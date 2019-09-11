@@ -1,73 +1,56 @@
 const express = require('express');
 const router = express.Router();
 
-
-let Recipes = require('../models/recipes.mongo')
+let Recipes = require('../models/recipes.mongo');
 
 router.get('/', (req, res) => {
-    //promise
-    Recipes.find()
-    .then((recipes) => res.json(recipes))
-    .catch(err => res.status(400).send('Error on getting recipes: ${err}'));
+  //promise
+  Recipes.find()
+  .then((recipes) => res.json(recipes))
+  .catch(err => res.status(400).send(`Error on getting recipes: ${err}`));
 
-    //Status 200 means success
-    //Status 400 means error
+  //Status 200 means success
+  //Status 400 means error
 });
 
-router.post('/', (req , res) => {
-    const { image_url, name } = req.body;
+router.post('/', (req, res) => {
+  const { image_url, name } = req.body;
 
-    // const newRecipes = {
-    //     id: uuidv1(),
-    //     image_url: image_url,
-    //     name: name,
-    // };
+  const newRecipes = new Recipes({
+    image_url,
+    name,
+  });
 
-    const newRecipes = new Recipes({
-        // image_url: image_url,
-        // name: name,
-        //shorter code is below!
-        image_url,
-        name,
-    })
-
-    //express function(promise) to save new document
-    newRecipes.save()
-    .then(()=> res.json('Successfully added recipe'))
-    .catch(err=> res.status(400).json({'msg' : `Could not save recipes ${err}`}))
+  //express function(Promise) to save new document in a collection
+  newRecipes.save()
+  .then(() => res.send('Successfully added recipe'))
+  .catch(err => res.status(400).json({ 'msg': `Could not save recipes: ${err}`}));
+  
 });
 
-router.put('/', (req , res) => {
-    const id = req.body.id;
-    const name = req.body.name;
-    const image_url = req.body.image_url;
+router.put('/', (req, res) => {
+  const id = req.body.id;
+  const name = req.body.name;
+  const image_url = req.body.image_url;
 
-    // const index = recipes.findIndex(k => k.id == id);
-    // recipes[index] = {
-    //     id: id,
-    //     // name: name ? name : recipes[index].name,
-    //     name: name,
-    //     image_url,
-    // }
+  var query = { _id: id };
+  var newUpdatingData = {
+    name: name,
+    image_url: image_url,
+  };
 
-    var query = { _id:id };
-    var newUpdatingData = {
-        name: name,
-        image_url: image_url
-    };
+  Recipes.findOneAndUpdate(query, newUpdatingData)
+  .then(() => res.send('Updating success'))
+  .catch(err => res.status(400).json({ 'msg': `Error: ${err}`}));
+})
 
-    Recipes.findOneAndUpdate(query, newUpdatingData)
-    .then(() => res.send('Updating success'))
-    .catch(err => res.status(400).json({ 'msg': `Error: ${err}`}));
+router.delete('/', (req, res) => {
+  const id = req.body.id;
 
-});
+  const index = recipes.findIndex(k => k.id == id);
 
-router.delete('/', (req , res) => {
-    const id = req.body.id;
-
-    const index = recipes.findIndex(r => r.id == id);
-    recipes.splice(index, 1);
-    res.json(recipes);
-});
+  recipes.splice(index, 1);
+  res.json(recipes)
+})
 
 module.exports = router;

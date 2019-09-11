@@ -1,32 +1,32 @@
-const express  = require('express');
-// const path =  require('path');
-const recipes = require('./models/recipes.js');
-const uuid = require('uuid/v1');
+const express = require('express');
+const recipes = require('./models/recipes')
+const uuidv1 = require('uuid/v1');
 const mongoose = require('mongoose');
-
 require('dotenv').config();
+
 
 const app = express();
 
+// Body-parser middleware
 app.use(express.json());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false })); // using querystring instead of qs
 
-// const ATLAS_URI = "mongodb+srv://mitsu_0612:ironmouse807@cluster0-htwos.mongodb.net/test?retryWrites=true&w=majority";
+//Connect to mongoDB
 const ATLAS_URI = process.env.ATLAS_URI;
 
 mongoose.connect(ATLAS_URI, {
-    useNewUrlParser: true, 
-    useCreateIndex: true,
-    useUnifiedTopology: true
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useUnifiedTopology: true
 });
-
 const connection = mongoose.connection;
 connection.once('open', () => {
-    console.log('mongoDB connection worked!')
+  //when connection succeeds
+  console.log('mongoDB connnection worked!');
 })
 
-//Routes
+// Routes
 app.use('/api/recipes', require('./routes/recipes'));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT,() => console.log(`Server started at port ${PORT}`));
+app.listen(PORT, () => console.log(`Server started at port ${PORT}`))
